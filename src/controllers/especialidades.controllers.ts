@@ -17,7 +17,39 @@ export const getEspecialidades = async (
     });
   }
 };
+export const getEspecialidadById = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
 
+    if (isNaN(id)) {
+      res.status(400).json({
+        message: "El ID debe ser un número",
+      });
+      return;
+    }
+
+    const especialidad = await especialidadModel.findById(id);
+
+    if (!especialidad) {
+      res.status(404).json({
+        message: "Especialidad no encontrada",
+      });
+      return;
+    }
+
+    res.json({
+      data: especialidad,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener la especialidad",
+      error,
+    });
+  }
+};
 export const postEspecialidades = async (
   req: Request,
   res: Response,
