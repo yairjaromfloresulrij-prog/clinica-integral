@@ -1,13 +1,15 @@
 import { Router } from "express";
+
 import {
-  getPacientes,
-  getPacienteById,
-  postPaciente,
-  putPaciente,
-  deletePaciente,
-} from "../controllers/paciente.controller.js";
+  getMedicos,
+  getMedicoById,
+  postMedico,
+  putMedico,
+  deleteMedico,
+} from "../controllers/medico.controllers.js";
+
 import { validate } from "../middlewares/validacion.general.js";
-import { patientSchema } from "../middlewares/validaciones.patiente.js";
+import { medicoSchema } from "../middlewares/validaciones.medico.js";
 import { authorize } from "../middlewares/authorize.middleware.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
@@ -17,37 +19,36 @@ router.get(
   "/",
   verifyToken,
   authorize("RECEPCIONISTA", "MEDICO", "GERENCIA"),
-  getPacientes,
-); // #swagger.tags = ['Pacientes']
+  getMedicos,
+); // #swagger.tags = ['Médicos']
 // #swagger.security = [{ "bearerAuth": [] }]
 
 router.get(
   "/:id",
   verifyToken,
   authorize("RECEPCIONISTA", "MEDICO", "GERENCIA"),
-  getPacienteById,
-); // #swagger.tags = ['Pacientes']
+  getMedicoById,
+); // #swagger.tags = ['Médicos']
 // #swagger.security = [{ "bearerAuth": [] }]
 
 router.post(
   "/",
   verifyToken,
-  authorize("RECEPCIONISTA", "GERENCIA"),
-  validate(patientSchema),
-  postPaciente,
-); // #swagger.tags = ['Pacientes']
+  authorize("GERENCIA"),
+  validate(medicoSchema),
+  postMedico,
+); // #swagger.tags = ['Médicos']
 // #swagger.security = [{ "bearerAuth": [] }]
 
 router.put(
   "/:id",
   verifyToken,
-  authorize("RECEPCIONISTA", "GERENCIA"),
-  validate(patientSchema),
-  putPaciente,
-); // #swagger.tags = ['Pacientes']
+  authorize("GERENCIA"),
+  validate(medicoSchema),
+  putMedico,
+); // #swagger.tags = ['Médicos']
 // #swagger.security = [{ "bearerAuth": [] }]
 
-router.delete("/:id", verifyToken, authorize("GERENCIA"), deletePaciente); // #swagger.tags = ['Pacientes']
-// // #swagger.security = [{ "bearerAuth": [] }]
-
+router.delete("/:id", verifyToken, authorize("GERENCIA"), deleteMedico); // #swagger.tags = ['Médicos']
+// #swagger.security = [{ "bearerAuth": [] }]
 export default router;

@@ -1,13 +1,17 @@
 import { Router } from "express";
 import {
-  getPacientes,
-  getPacienteById,
-  postPaciente,
-  putPaciente,
-  deletePaciente,
-} from "../controllers/paciente.controller.js";
+  getCitas,
+  getCitaById,
+  postCita,
+  putCita,
+  actualizarEstadoCita,
+  deleteCita,
+} from "../controllers/citas.controller.js";
 import { validate } from "../middlewares/validacion.general.js";
-import { patientSchema } from "../middlewares/validaciones.patiente.js";
+import {
+  citaSchema,
+  estadoCitaSchema,
+} from "../middlewares/validaciones.citas.js";
 import { authorize } from "../middlewares/authorize.middleware.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
@@ -17,37 +21,40 @@ router.get(
   "/",
   verifyToken,
   authorize("RECEPCIONISTA", "MEDICO", "GERENCIA"),
-  getPacientes,
-); // #swagger.tags = ['Pacientes']
+  getCitas,
+); // #swagger.tags = ['Citas']
 // #swagger.security = [{ "bearerAuth": [] }]
-
 router.get(
   "/:id",
   verifyToken,
   authorize("RECEPCIONISTA", "MEDICO", "GERENCIA"),
-  getPacienteById,
-); // #swagger.tags = ['Pacientes']
+  getCitaById,
+); // #swagger.tags = ['Citas']
 // #swagger.security = [{ "bearerAuth": [] }]
-
 router.post(
   "/",
   verifyToken,
   authorize("RECEPCIONISTA", "GERENCIA"),
-  validate(patientSchema),
-  postPaciente,
-); // #swagger.tags = ['Pacientes']
+  validate(citaSchema),
+  postCita,
+); // #swagger.tags = ['Citas']
 // #swagger.security = [{ "bearerAuth": [] }]
-
 router.put(
   "/:id",
   verifyToken,
   authorize("RECEPCIONISTA", "GERENCIA"),
-  validate(patientSchema),
-  putPaciente,
-); // #swagger.tags = ['Pacientes']
+  validate(citaSchema),
+  putCita,
+); // #swagger.tags = ['Citas']
 // #swagger.security = [{ "bearerAuth": [] }]
-
-router.delete("/:id", verifyToken, authorize("GERENCIA"), deletePaciente); // #swagger.tags = ['Pacientes']
-// // #swagger.security = [{ "bearerAuth": [] }]
-
+router.patch(
+  "/:id/estado",
+  verifyToken,
+  authorize("MEDICO"),
+  validate(estadoCitaSchema),
+  actualizarEstadoCita,
+); // #swagger.tags = ['Citas']
+// #swagger.security = [{ "bearerAuth": [] }]
+router.delete("/:id", verifyToken, authorize("GERENCIA"), deleteCita); // #swagger.tags = ['Citas']
+// #swagger.security = [{ "bearerAuth": [] }]
 export default router;
