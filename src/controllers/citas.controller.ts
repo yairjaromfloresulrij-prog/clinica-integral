@@ -1,16 +1,52 @@
 import type { Request, Response } from "express";
+import { EstadoCita } from "../../generated/prisma/enums.js";
 import { citaModel } from "../models/citas.model.js";
 
 export const getCitas = async (req: Request, res: Response): Promise<void> => {
   try {
-    const citas = await citaModel.findAll();
+    const estadoQuery = req.query.estado as string | undefined;
+
+    const paginaQuery = Number(req.query.pagina) || 1;
+
+    if (paginaQuery < 1) {
+      res.status(400).json({
+        message: "La página debe ser mayor o igual a 1",
+      });
+      return;
+    }
+
+    if (
+      estadoQuery &&
+      estadoQuery !== "Todos" &&
+      estadoQuery !== "Completada" &&
+      !Object.values(EstadoCita).includes(estadoQuery as EstadoCita)
+    ) {
+      res.status(400).json({
+        message: "Estado de cita inválido",
+      });
+      return;
+    }
+
+    const estado =
+      estadoQuery === "Todos" || !estadoQuery
+        ? undefined
+        : estadoQuery === "Completada"
+          ? EstadoCita.Realizada
+          : (estadoQuery as EstadoCita);
+
+    const resultado = await citaModel.findAll(estado, paginaQuery, 10);
+
+    const totalPaginas = Math.ceil(resultado.total / 10);
 
     res.json({
-      data: citas,
+      data: resultado.citas,
+      total: resultado.total,
+      pagina: paginaQuery,
+      totalPaginas,
     });
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({
-      message: error.message,
+      message: "Error al obtener las citas",
     });
   }
 };
@@ -115,6 +151,7 @@ export const putCita = async (req: Request, res: Response): Promise<void> => {
     });
   }
 };
+
 export const actualizarEstadoCita = async (
   req: Request,
   res: Response,

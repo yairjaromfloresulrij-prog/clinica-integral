@@ -4,46 +4,108 @@ import jwt from "jsonwebtoken";
 import { prisma } from "../config/prisma.js";
 
 export async function register(req: Request, res: Response) {
-  console.log("ENTRÓ AL REGISTER");
   try {
     const { email, password, role } = req.body;
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("DATOS:", email, password, role);
-    console.log("PASSWORD HASHEADA");
-    console.log("VOY A CREAR EL USUARIO");
+
     const user = await prisma.user.create({
-      data: { email, password: hashedPassword, role },
-      select: { id: true, email: true, role: true },
+      data: {
+        email,
+        password: hashedPassword,
+        role,
+      },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+      },
     });
-    console.log("USUARIO CREADO:", user);
+
     res.status(201).json(user);
-  } catch {
-    res.status(500).json({ message: "Error al registrar el usuario" });
+  } catch (error) {
+    console.error("ERROR AL REGISTRAR:", error);
+
+    res.status(500).json({
+      message: "Error al registrar el usuario",
+    });
   }
 }
 
 export async function login(req: Request, res: Response) {
   try {
     const { email, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { email } });
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: "Credenciales inválidas" });
+      return res.status(401).json({
+        message: "Credenciales inválidas",
+      });
     }
-    console.log("USUARIO LOGIN:", user);
-    console.log("ROL DEL USUARIO:", user.role);
+
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
       process.env.JWT_SECRET as string,
-      { expiresIn: "8h" },
+      {
+        expiresIn: "8h",
+      },
     );
 
     res.json({ token });
   } catch (error) {
-    console.error("ERROR AL REGISTRAR:", error);
+    console.error("ERROR AL INICIAR SESIÓN:", error);
 
     res.status(500).json({
-      message: "Error al registrar el usuario",
+      message: "Error al iniciar sesión",
+    });
+  }
+}
+
+export async function updatePerfil(req: Request, res: Response) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({
+        message: "Usuario no autenticado",
+      });
+    }
+
+    const { nombre, email, telefono } = req.body;
+
+    const foto = req.file ? `/uploads/${req.file.filename}` : undefined;
+
+    const usuarioActualizado = await prisma.user.update({
+      where: {
+        id: req.user.id,
+      },
+      data: {
+        nombre,
+        email,
+        telefono,
+        ...(foto && { foto }),
+      },
+      select: {
+        id: true,
+        nombre: true,
+        email: true,
+        telefono: true,
+        foto: true,
+        role: true,
+      },
+    });
+
+    return res.json(usuarioActualizado);
+  } catch (error) {
+    console.error("ERROR AL ACTUALIZAR PERFIL:", error);
+
+    return res.status(500).json({
+      message: "Error al actualizar el perfil",
     });
   }
 }

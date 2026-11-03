@@ -61,8 +61,12 @@ enum Role {
   GERENCIA
 }
 model user {
-  id Int @id @default(autoincrement())
-  email String @unique
+  id       Int    @id @default(autoincrement())
+  email    String @unique
   password String
-  role Role
+  role     Role
+
+  nombre   String?
+  telefono String?
+  foto     String?
 }

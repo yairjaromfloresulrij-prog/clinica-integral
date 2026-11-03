@@ -15,7 +15,7 @@ import {
 import { authorize } from "../middlewares/authorize.middleware.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
-const router = Router();
+const router: Router = Router();
 
 router.get(
   "/",

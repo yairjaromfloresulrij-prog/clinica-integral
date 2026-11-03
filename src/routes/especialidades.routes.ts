@@ -5,11 +5,11 @@ import {
   postEspecialidades,
   putEspecialidad,
   deleteEspecialidad,
-} from "../controllers/especialidades.controllers";
+} from "../controllers/especialidades.controllers.js";
 import { validate } from "../middlewares/validacion.general.js";
 import { especialidadSchema } from "../middlewares/validaciones.especialidad.js";
 import { authorize } from "../middlewares/authorize.middleware.js";
-import { verifyToken } from "../middlewares/auth.middleware";
+import { verifyToken } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 // #swagger.tags = ['Especialidades']
